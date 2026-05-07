@@ -1,30 +1,32 @@
+import { lazy, Suspense, useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
 import { LangProvider } from './context/LangContext';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import WorkshopDetail from './pages/WorkshopDetail';
-import InsightDetail from './pages/InsightDetail';
+
+// Route-level code splitting — detail pages load on demand
+const Home = lazy(() => import('./pages/Home'));
+const WorkshopDetail = lazy(() => import('./pages/WorkshopDetail'));
+const InsightDetail = lazy(() => import('./pages/InsightDetail'));
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
 
   useEffect(() => {
-    // Announce route change to screen readers
     const announcer = document.getElementById('aria-announcer');
-    if (announcer) {
-      announcer.textContent = document.title;
-      const timer = setTimeout(() => { announcer.textContent = ''; }, 1500);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
+    if (!announcer) return;
+    announcer.textContent = document.title;
+    const timer = setTimeout(() => { announcer.textContent = ''; }, 1500);
+    return () => clearTimeout(timer);
   }, [location.pathname]);
 
   return (
     <>
       <Nav />
-      {children}
+      {/* Suspense boundary per route — shows nothing while chunk loads (fast on any connection) */}
+      <Suspense fallback={null}>
+        {children}
+      </Suspense>
       <Footer />
     </>
   );
@@ -33,27 +35,15 @@ function Layout({ children }: { children: React.ReactNode }) {
 const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <Layout>
-        <Home />
-      </Layout>
-    ),
+    element: <Layout><Home /></Layout>,
   },
   {
     path: '/workshops/:id',
-    element: (
-      <Layout>
-        <WorkshopDetail />
-      </Layout>
-    ),
+    element: <Layout><WorkshopDetail /></Layout>,
   },
   {
     path: '/insights/:id',
-    element: (
-      <Layout>
-        <InsightDetail />
-      </Layout>
-    ),
+    element: <Layout><InsightDetail /></Layout>,
   },
   {
     path: '*',
@@ -64,12 +54,12 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <LangProvider>
-      {/* Skip link */}
+      {/* Skip link — visible on focus, hidden otherwise */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
 
-      {/* Aria-live announcer — must be in DOM before routing */}
+      {/* Screen reader announcer for route and theme/lang changes */}
       <div
         id="aria-announcer"
         className="sr-only"
