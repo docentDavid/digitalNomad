@@ -1,15 +1,14 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LangProvider } from './context/LangContext';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 
-// Route-level code splitting — detail pages load on demand
 const Home = lazy(() => import('./pages/Home'));
 const WorkshopDetail = lazy(() => import('./pages/WorkshopDetail'));
 const InsightDetail = lazy(() => import('./pages/InsightDetail'));
 
-function Layout({ children }: { children: React.ReactNode }) {
+function Layout() {
   const location = useLocation();
 
   useEffect(() => {
@@ -23,33 +22,18 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Nav />
-      {/* Suspense boundary per route — shows nothing while chunk loads (fast on any connection) */}
       <Suspense fallback={null}>
-        {children}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/workshops/:id" element={<WorkshopDetail />} />
+          <Route path="/insights/:id" element={<InsightDetail />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </Suspense>
       <Footer />
     </>
   );
 }
-
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Layout><Home /></Layout>,
-  },
-  {
-    path: '/workshops/:id',
-    element: <Layout><WorkshopDetail /></Layout>,
-  },
-  {
-    path: '/insights/:id',
-    element: <Layout><InsightDetail /></Layout>,
-  },
-  {
-    path: '*',
-    element: <Navigate to="/" replace />,
-  },
-]);
 
 export default function App() {
   return (
@@ -67,7 +51,7 @@ export default function App() {
         aria-atomic="true"
       />
 
-      <RouterProvider router={router} />
+      <Layout />
     </LangProvider>
   );
 }

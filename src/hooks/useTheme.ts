@@ -2,6 +2,7 @@ export type Theme = 'light' | 'dark';
 
 export function useTheme(): { theme: Theme; toggleTheme: () => void } {
   function getTheme(): Theme {
+    if (typeof document === 'undefined') return 'light';
     const attr = document.documentElement.dataset.theme;
     return attr === 'dark' ? 'dark' : 'light';
   }
@@ -14,7 +15,6 @@ export function useTheme(): { theme: Theme; toggleTheme: () => void } {
     } catch {
       // localStorage unavailable
     }
-    // Update theme-color meta tags
     const metas = document.querySelectorAll('meta[name="theme-color"]');
     metas.forEach((meta) => {
       const m = meta as HTMLMetaElement;
