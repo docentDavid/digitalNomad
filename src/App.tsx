@@ -3,8 +3,9 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LangProvider } from './context/LangContext';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
+import Home from './pages/Home';
 
-const Home = lazy(() => import('./pages/Home'));
+// Detail pages are navigation-only routes — lazy-load to keep the initial bundle small
 const WorkshopDetail = lazy(() => import('./pages/WorkshopDetail'));
 const InsightDetail = lazy(() => import('./pages/InsightDetail'));
 

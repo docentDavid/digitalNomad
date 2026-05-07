@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 
 export function useReveal<T extends Element>(ref: RefObject<T | null>): boolean {
-  // During SSR, default to visible so prerendered HTML shows content
-  const [isVisible, setIsVisible] = useState(typeof window === 'undefined');
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
